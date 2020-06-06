@@ -1,28 +1,47 @@
-var Apollo;
+var Leni;
 var BaseCamp;
+var Stars = [];
+var numberOfStars = 30
 var FINISHED;
-var DIFICULTY = 3
+var spaceShipImage;
+var leniImage;
+
+function preload() {
+  spaceShipImage = loadImage('https://res.cloudinary.com/dlw5iqglu/image/upload/c_thumb,g_face,w_50/v1591250211/leni/leni-nave.png');
+  leniImage = loadImage('https://res.cloudinary.com/dlw5iqglu/image/upload/c_scale,w_50/v1591254333/leni/leni-avatar2.png');
+}
 
 function setup() {
-  console.log(window)
   createCanvas(800, 600);
-  Apollo = new Ship()
+  Leni = new Ship()
   BaseCamp = new landingArea()
+  for (let i = 0; i < numberOfStars; i++) {
+    Stars[i] = new Star()
+  }
   FINISHED = false
 }
 
 function draw() {
-  background(51);
+  background('black');
 
-  Apollo.show()
+  Leni.show()
   BaseCamp.show()
+  for (let i = 0; i < numberOfStars; i++) {
+    Stars[i].show()
+  }
 
-  if(Apollo.dead){
+  if(frameCount%75 === 0){
+    for (let i = 0; i < numberOfStars; i++) {
+      Stars[i].reborn()
+    }
+  }
+
+  if(Leni.dead){
     FINISHED = true
   }
 
   if(!FINISHED){
-    Apollo.update()
+    Leni.update()
     this.handleKeyDown()
     this.detectLanding()
   }
@@ -31,44 +50,38 @@ function draw() {
 function keyPressed() { 
   if(keyCode === 32){ // SPACE
     this.setup()
+    loop()
   }
 }
 
- function detectLanding() {
+function detectLanding() {
+  const { x: LeniX , y: LeniY, yspeed, xspeed } = Leni
+  const { x: BaseCampX , y: BaseCampY } = BaseCamp
 
-   const { x: ApolloX , y: ApolloY, width: ApolloW, height: ApolloH } = Apollo
-   const { x: BaseCampX , y: BaseCampY, width: BaseCampW, height: BaseCampH } = BaseCamp
+  const distance = dist(LeniX, LeniY, BaseCampX, BaseCampY)
+  const absoluteVelocity = (yspeed * yspeed) + (xspeed * xspeed)
 
-
-  const shipMiddleX = ApolloX + ApolloW/2
-  const baseCampMiddleX = BaseCampX + BaseCampW/2
-
-  const yDistance = Math.abs(BaseCampY - (ApolloY + ApolloH) )
-  const xDistance = Math.abs(shipMiddleX - baseCampMiddleX)
-
-  if(xDistance < 10){
-    if(yDistance < 1){
-      if(Apollo.yspeed > (DIFICULTY * -1)){
-        FINISHED = true
-      } else {
-        Apollo.die()
-      }
-      console.log("FINISHED") 
+  if(distance < 50){
+    if(absoluteVelocity < 10){
+      console.log("FINISHED ranking:", absoluteVelocity)
       FINISHED = true
+    } else {
+      Leni.die()
     }
   }
+
 }
 
 function handleKeyDown() { 
   if (keyIsDown(LEFT_ARROW)) {
-    Apollo.throttleLeft(LEFT_ARROW)
+    Leni.throttleLeft(LEFT_ARROW)
   }
 
   if (keyIsDown(RIGHT_ARROW)) {
-    Apollo.throttleRight(RIGHT_ARROW)
+    Leni.throttleRight(RIGHT_ARROW)
   }
 
   if (keyIsDown(UP_ARROW)) {
-    Apollo.throttleUp(UP_ARROW)
+    Leni.throttleUp(UP_ARROW)
   }
 }
